@@ -240,17 +240,26 @@ function buildDelayTable() {
 
 // ── History ───────────────────────────────────────────────────
 function buildHistory() {
-  const isEuro = currentGame === 'euro';
-  document.getElementById('history-list').innerHTML = getDraws().map(draw => `
+  // EuroMillions
+  document.getElementById('history-euro').innerHTML = RECENT_DRAWS.map(draw => `
     <div class="draw-item">
       <div class="draw-date">${draw.date}</div>
       <div class="draw-balls">
-        ${draw.numbers.map(n => `<div class="small-ball ${ballClass()}">${n}</div>`).join('')}
+        ${draw.numbers.map(n => `<div class="small-ball ball-num">${n}</div>`).join('')}
         <span class="draw-sep">·</span>
-        ${isEuro
-          ? (draw.stars||[]).map(s => `<div class="small-ball ${extraBallClass()}">${s}</div>`).join('')
-          : `<div class="small-ball ${extraBallClass()}">${draw.chance}</div>`
-        }
+        ${(draw.stars||[]).map(s => `<div class="small-ball ball-star">${s}</div>`).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  // Loto
+  document.getElementById('history-loto').innerHTML = LOTO_RECENT_DRAWS.map(draw => `
+    <div class="draw-item">
+      <div class="draw-date">${draw.date}</div>
+      <div class="draw-balls">
+        ${draw.numbers.map(n => `<div class="small-ball ball-loto">${n}</div>`).join('')}
+        <span class="draw-sep">·</span>
+        <div class="small-ball ball-chance">${draw.chance}</div>
       </div>
     </div>
   `).join('');
