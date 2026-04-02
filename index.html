@@ -4,22 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Loto & EuroMillions Stats</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎰</text></svg>">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #07080f;
-      --surface: #0e1020;
-      --surface2: #161829;
-      --gold: #f5c842;
-      --gold2: #e8a820;
-      --blue: #3a6bff;
-      --red: #ff4057;
-      --green: #2ecc71;
-      --loto-red: #e63946;
-      --loto-red2: #c1121f;
-      --text: #e8eaf0;
-      --muted: #666d88;
-      --border: #1e2238;
+      --bg: #07080f; --surface: #0e1020; --surface2: #161829;
+      --gold: #f5c842; --gold2: #e8a820; --blue: #3a6bff;
+      --red: #ff4057; --green: #2ecc71;
+      --loto-red: #e63946; --loto-red2: #c1121f;
+      --text: #e8eaf0; --muted: #666d88; --border: #1e2238;
     }
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
@@ -34,11 +27,7 @@
 
     /* GAME SWITCHER */
     .game-switcher { position:relative;z-index:1; display:flex; justify-content:center; padding:20px; gap:12px; }
-    .game-btn {
-      padding:10px 28px; border-radius:30px; border:2px solid var(--border);
-      background:var(--surface); color:var(--muted); font-family:'DM Sans',sans-serif;
-      font-size:14px; font-weight:600; cursor:pointer; transition:all .25s; letter-spacing:.5px;
-    }
+    .game-btn { padding:10px 28px; border-radius:30px; border:2px solid var(--border); background:var(--surface); color:var(--muted); font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all .25s; letter-spacing:.5px; }
     .game-btn.euro.active { background:linear-gradient(135deg,#1a2a6c,#3a6bff); border-color:#3a6bff; color:#fff; box-shadow:0 4px 20px rgba(58,107,255,.35); }
     .game-btn.loto.active { background:linear-gradient(135deg,#7f0000,var(--loto-red)); border-color:var(--loto-red); color:#fff; box-shadow:0 4px 20px rgba(230,57,70,.35); }
     .game-btn:not(.active):hover { border-color:var(--muted); color:var(--text); }
@@ -55,7 +44,7 @@
 
     /* TABS */
     .tabs { position:relative;z-index:1; display:flex; border-bottom:1px solid var(--border); overflow-x:auto; padding:0 20px; }
-    .tab { padding:14px 22px; font-size:13px; font-weight:500; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; transition:all .2s; white-space:nowrap; background:none; border-left:none; border-right:none; border-top:none; letter-spacing:.5px; }
+    .tab { padding:14px 20px; font-size:13px; font-weight:500; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; transition:all .2s; white-space:nowrap; background:none; border-left:none; border-right:none; border-top:none; letter-spacing:.5px; }
     .tab:hover { color:var(--text); }
     .tab.active.euro-tab { color:var(--gold); border-bottom-color:var(--gold); }
     .tab.active.loto-tab { color:var(--loto-red); border-bottom-color:var(--loto-red); }
@@ -107,10 +96,10 @@
     .bar-chance { background:linear-gradient(90deg,#e07b00,#ff9f1c); }
     .pct { font-size:12px; color:var(--muted); text-align:right; }
     .num-display { display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:50%; font-weight:700; font-size:13px; }
-    .nd-euro { background:rgba(58,107,255,.15); color:#7ba7ff; border:1px solid rgba(58,107,255,.3); }
-    .nd-star { background:rgba(245,200,66,.15); color:var(--gold); border:1px solid rgba(245,200,66,.3); }
-    .nd-loto { background:rgba(230,57,70,.15); color:var(--loto-red); border:1px solid rgba(230,57,70,.3); }
-    .nd-chance { background:rgba(255,159,28,.15); color:#ff9f1c; border:1px solid rgba(255,159,28,.3); }
+    .nd-euro{background:rgba(58,107,255,.15);color:#7ba7ff;border:1px solid rgba(58,107,255,.3)}
+    .nd-star{background:rgba(245,200,66,.15);color:var(--gold);border:1px solid rgba(245,200,66,.3)}
+    .nd-loto{background:rgba(230,57,70,.15);color:var(--loto-red);border:1px solid rgba(230,57,70,.3)}
+    .nd-chance{background:rgba(255,159,28,.15);color:#ff9f1c;border:1px solid rgba(255,159,28,.3)}
     .delay-badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; }
     .delay-hot{background:rgba(46,204,113,.15);color:#2ecc71} .delay-warm{background:rgba(245,200,66,.15);color:var(--gold)} .delay-cold{background:rgba(255,64,87,.15);color:var(--red)}
 
@@ -148,18 +137,49 @@
     .draw-balls { display:flex; gap:5px; align-items:center; flex-wrap:wrap; }
     .small-ball { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:15px; }
     .draw-sep { color:var(--muted); }
-
-    /* GEN HISTORY */
     .gen-hist-item { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); flex-wrap:wrap; }
     .gen-hist-item:last-child { border-bottom:none; }
 
-    footer { position:relative;z-index:1; text-align:center; padding:20px; border-top:1px solid var(--border); font-size:12px; color:var(--muted); }
-    @media(max-width:600px){ .cards{grid-template-columns:repeat(2,1fr)} th,td{padding:7px 9px} .gen-section{padding:18px} }
+    /* INFO CARDS */
+    .info-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; margin-bottom:24px; }
+    .info-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:22px; }
+    .info-card-icon { font-size:28px; margin-bottom:10px; }
+    .info-card-title { font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:1px; margin-bottom:8px; }
+    .info-card-text { font-size:13px; color:var(--muted); line-height:1.7; }
+    .info-card-text strong { color:var(--text); }
+    .info-card.highlight-euro { border-color:rgba(245,200,66,.3); }
+    .info-card.highlight-red { border-color:rgba(255,64,87,.3); }
+    .info-card.highlight-green { border-color:rgba(46,204,113,.3); }
+    .info-card.highlight-blue { border-color:rgba(58,107,255,.3); }
+    .info-card.highlight-orange { border-color:rgba(255,159,28,.3); }
+    .proba-box { background:var(--surface2); border-radius:8px; padding:14px; margin-top:12px; font-size:12px; color:var(--muted); line-height:1.8; }
+    .proba-box .big { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:1px; display:block; }
+    .proba-box .big.euro { color:var(--gold); }
+    .proba-box .big.loto { color:var(--loto-red); }
+    .compare-table { width:100%; border-collapse:collapse; font-size:13px; margin-top:12px; }
+    .compare-table th { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); padding:8px; text-align:left; border-bottom:1px solid var(--border); }
+    .compare-table td { padding:8px; border-bottom:1px solid rgba(30,34,56,.4); }
+    .compare-table tr:last-child td { border-bottom:none; }
+
+    /* FOOTER */
+    footer { position:relative;z-index:1; background:var(--surface); border-top:2px solid var(--border); padding:32px 20px; }
+    .footer-inner { max-width:1100px; margin:0 auto; }
+    .footer-warning { display:flex; align-items:flex-start; gap:14px; background:rgba(255,64,87,.08); border:1px solid rgba(255,64,87,.25); border-radius:12px; padding:18px 22px; margin-bottom:24px; }
+    .footer-warning-icon { font-size:28px; flex-shrink:0; }
+    .footer-warning-text { font-size:13px; line-height:1.7; color:var(--text); }
+    .footer-warning-text strong { color:var(--red); font-size:14px; display:block; margin-bottom:4px; }
+    .footer-links { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:20px; }
+    .footer-block-title { font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:1px; color:var(--muted); margin-bottom:8px; }
+    .footer-block-text { font-size:12px; color:var(--muted); line-height:1.8; }
+    .footer-block-text a { color:var(--gold); text-decoration:none; }
+    .footer-block-text a:hover { text-decoration:underline; }
+    .footer-bottom { font-size:11px; color:var(--muted); text-align:center; padding-top:16px; border-top:1px solid var(--border); }
+
+    @media(max-width:600px){ .cards{grid-template-columns:repeat(2,1fr)} th,td{padding:7px 9px} .gen-section{padding:18px} .info-grid{grid-template-columns:1fr} }
   </style>
 </head>
 <body>
 
-<!-- GAME SWITCHER -->
 <div class="game-switcher">
   <button class="game-btn euro active" onclick="switchGame('euro', this)">🌟 EuroMillions</button>
   <button class="game-btn loto" onclick="switchGame('loto', this)">🎱 Loto</button>
@@ -178,6 +198,8 @@
   <button class="tab euro-tab" onclick="showPanel('delay', this)">Retards</button>
   <button class="tab euro-tab" onclick="showPanel('generator', this)">Générateur</button>
   <button class="tab euro-tab" onclick="showPanel('history', this)">Derniers tirages</button>
+  <button class="tab euro-tab" onclick="showPanel('strategies', this)">📖 Stratégies</button>
+  <button class="tab euro-tab" onclick="showPanel('explainer', this)">🔢 Comprendre les stats</button>
 </div>
 
 <main>
@@ -259,13 +281,204 @@
 
   <!-- HISTORY -->
   <div id="panel-history" class="panel">
-    <p class="section-title euro-accent" id="history-title">📅 Derniers tirages</p>
-    <div id="history-list"></div>
+    <p class="section-title euro-accent" id="history-title">📅 Derniers tirages EuroMillions</p>
+    <div id="history-euro"></div>
+    <p class="section-title loto-accent" style="margin-top:28px">📅 Derniers tirages Loto</p>
+    <div id="history-loto"></div>
+  </div>
+
+  <!-- STRATEGIES -->
+  <div id="panel-strategies" class="panel">
+    <p class="section-title euro-accent">📖 Les stratégies du générateur</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.7">
+      Chaque stratégie utilise les statistiques réelles pour sélectionner les numéros différemment.
+      <strong style="color:var(--text)">Aucune ne prédit l'avenir</strong> — mais elles donnent des grilles construites intelligemment plutôt qu'au hasard total.
+    </p>
+
+    <div class="info-grid">
+      <div class="info-card highlight-euro">
+        <div class="info-card-icon">🎲</div>
+        <div class="info-card-title">Aléatoire pondéré</div>
+        <div class="info-card-text">
+          Ce n'est pas un hasard pur à 100%. Les numéros sont tirés avec un <strong>poids proportionnel à leur fréquence historique</strong>. Un numéro sorti 278 fois a légèrement plus de chances d'être choisi qu'un sorti 221 fois. La différence est subtile mais réelle.
+          <div class="proba-box">Poids = fréquence brute de chaque numéro</div>
+        </div>
+      </div>
+
+      <div class="info-card highlight-red">
+        <div class="info-card-icon">🔥</div>
+        <div class="info-card-title">Numéros chauds</div>
+        <div class="info-card-text">
+          Favorise massivement les numéros <strong>les plus souvent sortis</strong> depuis 2004. Le poids est calculé au carré pour amplifier les écarts : un numéro très fréquent a un avantage énorme sur les autres.
+          <div class="proba-box">Poids = fréquence² — Les écarts sont amplifiés</div>
+        </div>
+      </div>
+
+      <div class="info-card highlight-blue">
+        <div class="info-card-icon">❄️</div>
+        <div class="info-card-title">Numéros froids</div>
+        <div class="info-card-text">
+          L'exact opposé des chauds. Favorise les numéros <strong>les moins sortis</strong>. Certains joueurs pensent qu'un numéro "doit finir par sortir" — c'est mathématiquement faux, mais c'est une stratégie comme une autre.
+          <div class="proba-box">Poids = (max - fréquence)² — Inverse des chauds</div>
+        </div>
+      </div>
+
+      <div class="info-card highlight-green">
+        <div class="info-card-icon">⚖️</div>
+        <div class="info-card-title">Équilibré</div>
+        <div class="info-card-text">
+          Stratégie en <strong>4 couches</strong> : 2 numéros parmi les plus fréquents + 1 du milieu + 1 des plus rares + 1 surprise. Donne une grille diversifiée qui couvre tout le spectre statistique. Idéale si vous voulez une grille "raisonnée".
+          <div class="proba-box">2 chauds + 1 milieu + 1 froid + 1 joker</div>
+        </div>
+      </div>
+
+      <div class="info-card highlight-orange">
+        <div class="info-card-icon">⏱️</div>
+        <div class="info-card-title">En retard</div>
+        <div class="info-card-text">
+          Favorise les numéros qui <strong>n'ont pas été tirés depuis le plus longtemps</strong>. Le poids est calculé en fonction du nombre de tirages depuis leur dernière apparition. Plus un numéro est absent, plus il est favorisé.
+          <div class="proba-box">Poids = retard² — Plus l'absence est longue, plus c'est favorisé</div>
+        </div>
+      </div>
+
+      <div class="info-card highlight-blue">
+        <div class="info-card-icon">📅</div>
+        <div class="info-card-title">Tendance récente</div>
+        <div class="info-card-text">
+          Se concentre sur les <strong>50 derniers tirages</strong> plutôt que sur l'historique complet depuis 2004. Les numéros fréquents sur la période récente reçoivent un bonus x3. Utile pour détecter des "cycles" temporaires.
+          <div class="proba-box">Fréquence récente × 3 + fréquence historique</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-header"><span class="table-title">📊 Comparaison des probabilités par jeu</span></div>
+      <table class="compare-table">
+        <thead><tr><th>Jeu</th><th>Combinaison</th><th>1 chance sur...</th><th>Équivalent</th></tr></thead>
+        <tbody>
+          <tr><td>🌟 EuroMillions</td><td>5/50 + 2 étoiles/12</td><td style="color:var(--red);font-weight:700">139 838 160</td><td style="color:var(--muted);font-size:12px">Se faire frapper 2× par la foudre</td></tr>
+          <tr><td>🎱 Loto</td><td>5/49 + 1 chance/10</td><td style="color:var(--loto-red);font-weight:700">19 068 840</td><td style="color:var(--muted);font-size:12px">~7× plus probable que l'EM</td></tr>
+          <tr><td>🌟 EuroMillions rang 2</td><td>5/50 + 1 étoile/12</td><td style="color:var(--gold);font-weight:700">6 991 908</td><td style="color:var(--muted);font-size:12px">Encore très rare</td></tr>
+          <tr><td>🎱 Loto rang 2</td><td>5/49 + 0 chance</td><td style="color:var(--gold);font-weight:700">1 906 884</td><td style="color:var(--muted);font-size:12px">Plus accessible</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- EXPLAINER -->
+  <div id="panel-explainer" class="panel">
+    <p class="section-title euro-accent">🔢 Comprendre les statistiques</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.7">
+      Comment lire et interpréter les données de ce site. Ce que les chiffres veulent vraiment dire.
+    </p>
+
+    <div class="info-grid">
+      <div class="info-card highlight-red">
+        <div class="info-card-icon">🔥</div>
+        <div class="info-card-title">Numéro chaud</div>
+        <div class="info-card-text">
+          Un numéro "chaud" est sorti <strong>plus souvent que la moyenne</strong> sur l'ensemble des tirages depuis 2004. La moyenne théorique est de 10% par tirage pour chaque numéro. Un numéro chaud tourne autour de <strong>10.5% à 11%</strong>.
+          <div class="proba-box">⚠️ Un numéro chaud n'a PAS plus de chances de sortir au prochain tirage. Chaque tirage repart de zéro.</div>
+        </div>
+      </div>
+
+      <div class="info-card highlight-blue">
+        <div class="info-card-icon">❄️</div>
+        <div class="info-card-title">Numéro froid</div>
+        <div class="info-card-text">
+          Un numéro "froid" est sorti <strong>moins souvent que la moyenne</strong>. Il tourne autour de <strong>9% à 9.5%</strong>. Certains pensent qu'il "rattrapera" son retard — c'est la <strong>fallace du joueur</strong>, un biais cognitif bien connu.
+          <div class="proba-box">⚠️ Les tirages sont indépendants. Le passé n'influence jamais le futur.</div>
+        </div>
+      </div>
+
+      <div class="info-card highlight-euro">
+        <div class="info-card-icon">⏱️</div>
+        <div class="info-card-title">Le retard</div>
+        <div class="info-card-text">
+          Le retard indique <strong>depuis combien de tirages un numéro n'est pas sorti</strong>. Un retard de 0 = sorti au dernier tirage. Un retard de 30 = absent depuis 30 tirages. Le record historique dépasse parfois 60 tirages consécutifs sans apparition.
+          <div class="proba-box">
+            <span>🟢 Récent = 0 à 5 tirages</span><br>
+            <span>🟡 Normal = 6 à 15 tirages</span><br>
+            <span>🔴 En retard = 16+ tirages</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card highlight-green">
+        <div class="info-card-icon">📊</div>
+        <div class="info-card-title">La fréquence en %</div>
+        <div class="info-card-text">
+          La fréquence indique <strong>dans quel pourcentage des tirages</strong> un numéro est apparu. La valeur théorique parfaite serait 10% pour chaque numéro (5 tirés sur 50). En pratique les écarts sont faibles mais visibles sur 1500+ tirages.
+          <div class="proba-box">Fréquence = (nb sorties ÷ nb tirages) × 100</div>
+        </div>
+      </div>
+
+      <div class="info-card highlight-orange">
+        <div class="info-card-icon">🧠</div>
+        <div class="info-card-title">La fallace du joueur</div>
+        <div class="info-card-text">
+          C'est le biais cognitif le plus courant au jeu. On croit qu'après une longue absence, un numéro "doit" sortir. <strong>C'est faux.</strong> Une pièce qui tombe 10 fois sur face n'a pas plus de chances de tomber sur pile au 11e lancer. Les probabilités restent identiques.
+          <div class="proba-box">P(numéro) = 5/50 = 10% — toujours, pour chaque tirage</div>
+        </div>
+      </div>
+
+      <div class="info-card highlight-blue">
+        <div class="info-card-icon">🎯</div>
+        <div class="info-card-title">Alors ça sert à quoi ?</div>
+        <div class="info-card-text">
+          Les stats ne permettent pas de prédire. Mais elles permettent de <strong>jouer de manière éclairée</strong>, d'éviter les combinaisons trop jouées (qui divisent le gain en cas de victoire), et surtout de comprendre la beauté mathématique derrière ces jeux.
+          <div class="proba-box">La vraie victoire : comprendre les probabilités 😄</div>
+        </div>
+      </div>
+    </div>
   </div>
 
 </main>
 
-<footer>⚠️ Site à usage statistique uniquement. Le jeu reste du hasard pur. Jouez de manière responsable.</footer>
+<!-- FOOTER COMPLET -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-warning">
+      <div class="footer-warning-icon">⚠️</div>
+      <div class="footer-warning-text">
+        <strong>Avertissement important — Jeu responsable</strong>
+        Ce site est à usage statistique et éducatif uniquement. Les statistiques présentées ne permettent en aucun cas de prédire les résultats futurs. Chaque tirage est un événement indépendant et aléatoire. La probabilité de gagner le jackpot EuroMillions est de 1 sur 139 838 160, et de 1 sur 19 068 840 pour le Loto. Le jeu peut créer une dépendance — jouez de manière responsable et ne misez jamais plus que ce que vous pouvez vous permettre de perdre.
+      </div>
+    </div>
+
+    <div class="footer-links">
+      <div>
+        <div class="footer-block-title">🆘 Aide & Soutien</div>
+        <div class="footer-block-text">
+          Joueurs Info Service (gratuit) :<br>
+          <a href="tel:0974751313">📞 09 74 75 13 13</a><br>
+          <a href="https://www.joueurs-info-service.fr" target="_blank">joueurs-info-service.fr</a><br><br>
+          Addiction Alcool Drogues Info Service :<br>
+          <a href="tel:0800234135">📞 0800 23 41 35</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-block-title">🔗 Sources officielles</div>
+        <div class="footer-block-text">
+          <a href="https://www.fdj.fr" target="_blank">fdj.fr</a> — Résultats officiels France<br>
+          <a href="https://www.euro-millions.com" target="_blank">euro-millions.com</a> — EuroMillions<br>
+          <a href="https://www.loterie-nationale.be" target="_blank">loterie-nationale.be</a> — Statistiques<br><br>
+          Données mises à jour automatiquement chaque mardi et vendredi.
+        </div>
+      </div>
+      <div>
+        <div class="footer-block-title">📐 À propos des stats</div>
+        <div class="footer-block-text">
+          Les fréquences sont calculées sur ~1547 tirages EuroMillions (depuis fév. 2004) et ~1823 tirages Loto (depuis 2008). Les données sont à titre informatif uniquement. Aucune garantie de gain n'est associée à l'utilisation de ce site.
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      Site indépendant — Non affilié à la FDJ, EuroMillions ou tout opérateur de loterie · Statistiques à usage éducatif uniquement
+    </div>
+  </div>
+</footer>
 
 <script src="data.js"></script>
 <script src="script.js"></script>
