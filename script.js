@@ -61,41 +61,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   buildGenModes();
   updateGenUI();
   document.getElementById('data-info').textContent = `${TOTAL_DRAWS} tirages analysés (2004–2025)`;
-  await fetchLiveDraws();
 });
-
-// ── Live fetch (Netlify function) ─────────────────────────────
-async function fetchLiveDraws() {
-  try {
-    const res = await fetch('/.netlify/functions/draws');
-    if (!res.ok) throw new Error('err');
-    const data = await res.json();
-    const draws = Array.isArray(data) ? data : (data.draws || []);
-    const converted = draws.map(d => ({
-      date: d.date ? new Date(d.date).toLocaleDateString('fr-FR') : '–',
-      numbers: d.numbers || [],
-      stars: d.stars || d.luckyStars || []
-    })).filter(d => d.numbers.length === 5 && d.stars.length === 2);
-    if (converted.length > 0) {
-      const merged = mergeDraws(converted, RECENT_DRAWS);
-      RECENT_DRAWS.length = 0;
-      merged.forEach(d => RECENT_DRAWS.push(d));
-      if (currentGame === 'euro') { buildDelayTable(); buildHistory(); }
-      document.getElementById('data-info').textContent =
-        `✅ ${TOTAL_DRAWS} tirages — Mis à jour le ${new Date().toLocaleDateString('fr-FR')}`;
-    }
-  } catch(e) {
-    // fallback silencieux
-  }
-}
-
-function mergeDraws(live, local) {
-  const seen = new Set();
-  return [...live, ...local].filter(d => {
-    if (seen.has(d.date)) return false;
-    seen.add(d.date); return true;
-  }).slice(0, 60);
-}
 
 // ── Navigation ────────────────────────────────────────────────
 function showPanel(id, tabEl) {
