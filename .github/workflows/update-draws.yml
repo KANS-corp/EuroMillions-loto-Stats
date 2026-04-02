@@ -2,9 +2,18 @@ name: Mise à jour des tirages EuroMillions
 
 on:
   schedule:
-    - cron: '30 21 * * 2'   # Mardi 21h30 UTC (22h30 heure française)
-    - cron: '30 21 * * 5'   # Vendredi 21h30 UTC (22h30 heure française)
-  workflow_dispatch:          # Permet aussi de lancer manuellement
+    # Balayage toutes les 30min entre 21h00 et 01h00 heure française
+    # (20h00 à 00h00 UTC) les mardi et vendredi
+    - cron: '00 20 * * 2,5'   # 21h00
+    - cron: '30 20 * * 2,5'   # 21h30
+    - cron: '00 21 * * 2,5'   # 22h00
+    - cron: '30 21 * * 2,5'   # 22h30
+    - cron: '00 22 * * 2,5'   # 23h00
+    - cron: '30 22 * * 2,5'   # 23h30
+    - cron: '00 23 * * 2,5'   # 00h00
+    - cron: '30 23 * * 2,5'   # 00h30
+    - cron: '00 00 * * 3,6'   # 01h00 (mercredi/samedi)
+  workflow_dispatch:            # Lancement manuel possible aussi
 
 jobs:
   update:
@@ -18,13 +27,11 @@ jobs:
 
       - name: Récupérer les derniers tirages
         run: |
-          python3 - << 'EOF'
+          python3 - << 'PYEOF'
           import urllib.request
           import json
-          import re
           from datetime import datetime
 
-          # Récupère les 10 derniers tirages depuis l'API
           try:
             url = "https://euromillions.api.pedromealha.dev/v1/draws?limit=10"
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
@@ -39,7 +46,6 @@ jobs:
             print("Aucun tirage reçu")
             exit(0)
 
-          # Convertit en format JS
           new_entries = []
           for d in draws[:5]:
             try:
@@ -56,11 +62,15 @@ jobs:
             print("Aucune entrée valide")
             exit(0)
 
-          # Lit data.js
           with open("data.js", "r", encoding="utf-8") as f:
             content = f.read()
 
-          # Trouve le début du tableau RECENT_DRAWS et insère les nouvelles entrées
+          # Anti-doublon : si la date la plus récente est déjà là on arrête
+          first_date = new_entries[0].split('"')[1] if new_entries else ""
+          if first_date and first_date in content:
+            print(f"Tirage du {first_date} déjà présent, rien à faire")
+            exit(0)
+
           marker = "const RECENT_DRAWS = ["
           idx = content.find(marker)
           if idx == -1:
@@ -69,25 +79,18 @@ jobs:
 
           insert_pos = idx + len(marker) + 1
           new_block = "\n".join(new_entries) + ",\n"
-
-          # Vérifie si la date la plus récente est déjà là (anti-doublon)
-          first_date = new_entries[0].split('"')[1] if new_entries else ""
-          if first_date and first_date in content:
-            print(f"Tirage du {first_date} déjà présent, pas de mise à jour")
-            exit(0)
-
           new_content = content[:insert_pos] + new_block + content[insert_pos:]
 
           with open("data.js", "w", encoding="utf-8") as f:
             f.write(new_content)
 
-          print(f"✅ {len(new_entries)} tirage(s) ajouté(s)")
-          EOF
+          print(f"✅ {len(new_entries)} tirage(s) ajouté(s) — {first_date}")
+          PYEOF
 
       - name: Commit et push si changements
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data.js
-          git diff --staged --quiet || git commit -m "🎰 Mise à jour automatique des tirages"
+          git diff --staged --quiet || git commit -m "🎰 Nouveau tirage ajouté automatiquement"
           git push
