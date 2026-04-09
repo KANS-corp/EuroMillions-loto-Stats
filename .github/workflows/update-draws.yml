@@ -31,8 +31,7 @@ jobs:
           from datetime import datetime
 
           try:
-            # On récupère les 5 derniers tirages triés du plus récent au plus ancien
-            url = "https://euromillions.api.pedromealha.dev/v1/draws?limit=5&order=desc"
+            url = "https://euromillions.api.pedromealha.dev/v1/draws?limit=20"
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
             with urllib.request.urlopen(req, timeout=10) as r:
               data = json.loads(r.read())
@@ -45,7 +44,7 @@ jobs:
             print("Aucun tirage reçu")
             exit(0)
 
-          # Trie par date décroissante au cas où l'API ne le fait pas
+          # Trie par date décroissante
           def parse_date(d):
             try:
               return datetime.strptime(d.get("date","1900-01-01"), "%Y-%m-%d")
@@ -54,11 +53,18 @@ jobs:
 
           draws = sorted(draws, key=parse_date, reverse=True)
 
+          # Garde uniquement les tirages récents (2024 et après)
+          cutoff = datetime(2024, 1, 1)
+          draws = [d for d in draws if parse_date(d) >= cutoff]
+
+          if not draws:
+            print("Aucun tirage récent trouvé")
+            exit(0)
+
           new_entries = []
           for d in draws[:3]:
             try:
               date_str = datetime.strptime(d["date"], "%Y-%m-%d").strftime("%d/%m/%Y")
-              # Force les numéros en entiers
               nums = [int(n) for n in d.get("numbers", [])]
               stars = [int(s) for s in d.get("stars", d.get("luckyStars", []))]
               if len(nums) == 5 and len(stars) == 2:
@@ -75,7 +81,7 @@ jobs:
           with open("data.js", "r", encoding="utf-8") as f:
             content = f.read()
 
-          # Anti-doublon : si la date la plus récente est déjà là on arrête
+          # Anti-doublon
           first_date = new_entries[0].split('"')[1] if new_entries else ""
           if first_date and first_date in content:
             print(f"Tirage du {first_date} déjà présent, rien à faire")
