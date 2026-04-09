@@ -2,7 +2,7 @@ name: Mise à jour des tirages EuroMillions
 
 on:
   schedule:
-    - cron: '00 19 * * 2,5'   # 21h00 heure française (UTC+2 été)
+    - cron: '00 19 * * 2,5'   # 21h00 heure française
     - cron: '30 19 * * 2,5'   # 21h30
     - cron: '00 20 * * 2,5'   # 22h00
     - cron: '30 20 * * 2,5'   # 22h30
@@ -10,7 +10,7 @@ on:
     - cron: '30 21 * * 2,5'   # 23h30
     - cron: '00 22 * * 2,5'   # 00h00
     - cron: '30 22 * * 2,5'   # 00h30
-    - cron: '00 23 * * 3,6'   # 01h00 (mercredi/samedi)
+    - cron: '00 23 * * 3,6'   # 01h00
   workflow_dispatch:
 
 jobs:
@@ -23,84 +23,112 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
+      - name: Installer les dépendances
+        run: pip install requests beautifulsoup4
+
       - name: Récupérer les derniers tirages
         run: |
           python3 - << 'PYEOF'
-          import urllib.request
-          import json
+          import requests
+          from bs4 import BeautifulSoup
           from datetime import datetime
+          import re
+
+          headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
           try:
-            url = "https://euromillions.api.pedromealha.dev/v1/draws?limit=20"
-            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(req, timeout=10) as r:
-              data = json.loads(r.read())
+            # Scrape le site officiel euro-millions.com
+            url = "https://www.euro-millions.com/results"
+            r = requests.get(url, headers=headers, timeout=15)
+            soup = BeautifulSoup(r.text, "html.parser")
+
+            new_entries = []
+
+            # Cherche les résultats récents
+            draws = soup.find_all("div", class_="draw-entry") or soup.find_all("li", class_="draw")
+            
+            if not draws:
+              # Essaie une autre structure
+              draws = soup.find_all(["tr", "div"], attrs={"data-draw-date": True})
+
+            if not draws:
+              # Fallback : cherche les numéros directement
+              result_sets = soup.find_all("ul", class_=re.compile(r"ball|number|result", re.I))
+              
+            print(f"Trouvé {len(draws)} entrées")
+            
+          except Exception as e:
+            print(f"Erreur scraping: {e}")
+
+          # Fallback sur l'API pedromealha avec filtre par année
+          try:
+            today = datetime.now()
+            year = today.year
+            url2 = f"https://euromillions.api.pedromealha.dev/v1/draws?year={year}"
+            r2 = requests.get(url2, headers=headers, timeout=15)
+            data = r2.json()
+            
+            draws_list = data if isinstance(data, list) else data.get("draws", [])
+            
+            if not draws_list:
+              # Essaie aussi l'année précédente
+              url3 = f"https://euromillions.api.pedromealha.dev/v1/draws?year={year-1}"
+              r3 = requests.get(url3, headers=headers, timeout=15)
+              draws_list = r3.json() if isinstance(r3.json(), list) else r3.json().get("draws", [])
+
+            def parse_date(d):
+              try:
+                return datetime.strptime(d.get("date","1900-01-01"), "%Y-%m-%d")
+              except:
+                return datetime.min
+
+            draws_list = sorted(draws_list, key=parse_date, reverse=True)
+            print(f"API a renvoyé {len(draws_list)} tirages pour {year}")
+
+            new_entries = []
+            for d in draws_list[:3]:
+              try:
+                date_str = datetime.strptime(d["date"], "%Y-%m-%d").strftime("%d/%m/%Y")
+                nums = [int(n) for n in d.get("numbers", [])]
+                stars = [int(s) for s in d.get("stars", d.get("luckyStars", []))]
+                if len(nums) == 5 and len(stars) == 2:
+                  entry = f'  {{ date: "{date_str}", numbers: {nums}, stars: {stars} }}'
+                  new_entries.append(entry)
+                  print(f"Tirage trouvé: {date_str} — {nums} / {stars}")
+              except Exception as e:
+                print(f"Erreur entrée: {e}")
+                continue
+
+            if not new_entries:
+              print("Aucune entrée valide trouvée")
+              exit(0)
+
+            with open("data.js", "r", encoding="utf-8") as f:
+              content = f.read()
+
+            first_date = new_entries[0].split('"')[1] if new_entries else ""
+            if first_date and first_date in content:
+              print(f"Tirage du {first_date} déjà présent, rien à faire")
+              exit(0)
+
+            marker = "const RECENT_DRAWS = ["
+            idx = content.find(marker)
+            if idx == -1:
+              print("Marqueur non trouvé")
+              exit(0)
+
+            insert_pos = idx + len(marker) + 1
+            new_block = "\n".join(new_entries) + ",\n"
+            new_content = content[:insert_pos] + new_block + content[insert_pos:]
+
+            with open("data.js", "w", encoding="utf-8") as f:
+              f.write(new_content)
+
+            print(f"✅ {len(new_entries)} tirage(s) ajouté(s) — {first_date}")
+
           except Exception as e:
             print(f"Erreur API: {e}")
             exit(0)
-
-          draws = data if isinstance(data, list) else data.get("draws", [])
-          if not draws:
-            print("Aucun tirage reçu")
-            exit(0)
-
-          # Trie par date décroissante
-          def parse_date(d):
-            try:
-              return datetime.strptime(d.get("date","1900-01-01"), "%Y-%m-%d")
-            except:
-              return datetime.min
-
-          draws = sorted(draws, key=parse_date, reverse=True)
-
-          # Garde uniquement les tirages récents (2024 et après)
-          cutoff = datetime(2024, 1, 1)
-          draws = [d for d in draws if parse_date(d) >= cutoff]
-
-          if not draws:
-            print("Aucun tirage récent trouvé")
-            exit(0)
-
-          new_entries = []
-          for d in draws[:3]:
-            try:
-              date_str = datetime.strptime(d["date"], "%Y-%m-%d").strftime("%d/%m/%Y")
-              nums = [int(n) for n in d.get("numbers", [])]
-              stars = [int(s) for s in d.get("stars", d.get("luckyStars", []))]
-              if len(nums) == 5 and len(stars) == 2:
-                entry = f'  {{ date: "{date_str}", numbers: {nums}, stars: {stars} }}'
-                new_entries.append(entry)
-            except Exception as e:
-              print(f"Erreur entrée: {e}")
-              continue
-
-          if not new_entries:
-            print("Aucune entrée valide")
-            exit(0)
-
-          with open("data.js", "r", encoding="utf-8") as f:
-            content = f.read()
-
-          # Anti-doublon
-          first_date = new_entries[0].split('"')[1] if new_entries else ""
-          if first_date and first_date in content:
-            print(f"Tirage du {first_date} déjà présent, rien à faire")
-            exit(0)
-
-          marker = "const RECENT_DRAWS = ["
-          idx = content.find(marker)
-          if idx == -1:
-            print("Marqueur non trouvé")
-            exit(0)
-
-          insert_pos = idx + len(marker) + 1
-          new_block = "\n".join(new_entries) + ",\n"
-          new_content = content[:insert_pos] + new_block + content[insert_pos:]
-
-          with open("data.js", "w", encoding="utf-8") as f:
-            f.write(new_content)
-
-          print(f"✅ {len(new_entries)} tirage(s) ajouté(s) — {first_date}")
           PYEOF
 
       - name: Commit et push si changements
