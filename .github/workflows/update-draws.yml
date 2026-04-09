@@ -92,7 +92,7 @@ jobs:
                 nums = [int(n) for n in d.get("numbers", [])]
                 stars = [int(s) for s in d.get("stars", d.get("luckyStars", []))]
                 if len(nums) == 5 and len(stars) == 2:
-                  entry = f'  {{ date: "{date_str}", numbers: {nums}, stars: {stars} }}'
+                  entry = f'  {{ date: "{date_str}", numbers: {nums}, stars: {stars} }},'
                   new_entries.append(entry)
                   print(f"Tirage trouvé: {date_str} — {nums} / {stars}")
               except Exception as e:
