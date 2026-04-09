@@ -34,11 +34,6 @@ const TOTAL_DRAWS = 1547;
 // Derniers tirages réels (les plus récents en premier)
 // Format: { date, numbers: [5 nums], stars: [2 étoiles] }
 const RECENT_DRAWS = [
-  { date: "13/02/2004", numbers: ['16', '29', '32', '36', '41'], stars: ['7', '9'] }
-  { date: "20/02/2004", numbers: ['7', '13', '39', '47', '50'], stars: ['2', '5'] }
-  { date: "27/02/2004", numbers: ['14', '18', '19', '31', '37'], stars: ['4', '5'] }
-  { date: "05/03/2004", numbers: ['4', '7', '33', '37', '39'], stars: ['1', '5'] }
-  { date: "12/03/2004", numbers: ['15', '24', '28', '44', '47'], stars: ['4', '5'] },
   { date: "28/03/2026", numbers: [3, 14, 27, 39, 48], stars: [4, 9] },
   { date: "25/03/2026", numbers: [11, 22, 31, 44, 50], stars: [2, 7] },
   { date: "21/03/2026", numbers: [5, 18, 29, 36, 47], stars: [1, 11] },
