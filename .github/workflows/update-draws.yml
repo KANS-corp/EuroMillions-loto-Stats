@@ -3,16 +3,16 @@ name: Mise à jour des tirages EuroMillions
 on:
   schedule:
     # Balayage toutes les 30min entre 21h00 et 01h00 heure française
-    # (20h00 à 00h00 UTC) les mardi et vendredi
-    - cron: '00 20 * * 2,5'   # 21h00
-    - cron: '30 20 * * 2,5'   # 21h30
-    - cron: '00 21 * * 2,5'   # 22h00
-    - cron: '30 21 * * 2,5'   # 22h30
-    - cron: '00 22 * * 2,5'   # 23h00
-    - cron: '30 22 * * 2,5'   # 23h30
-    - cron: '00 23 * * 2,5'   # 00h00
-    - cron: '30 23 * * 2,5'   # 00h30
-    - cron: '00 00 * * 3,6'   # 01h00 (mercredi/samedi)
+    # GitHub Actions utilise UTC — France = UTC+2 en été, UTC+1 en hiver
+    - cron: '00 19 * * 2,5'   # 21h00 heure française (UTC+2 été)
+    - cron: '30 19 * * 2,5'   # 21h30
+    - cron: '00 20 * * 2,5'   # 22h00
+    - cron: '30 20 * * 2,5'   # 22h30
+    - cron: '00 21 * * 2,5'   # 23h00
+    - cron: '30 21 * * 2,5'   # 23h30
+    - cron: '00 22 * * 2,5'   # 00h00
+    - cron: '30 22 * * 2,5'   # 00h30
+    - cron: '00 23 * * 3,6'   # 01h00 (mercredi/samedi)
   workflow_dispatch:            # Lancement manuel possible aussi
 
 jobs:
@@ -65,7 +65,7 @@ jobs:
           with open("data.js", "r", encoding="utf-8") as f:
             content = f.read()
 
-          # Anti-doublon : si la date la plus récente est déjà là on arrête
+          # Anti-doublon
           first_date = new_entries[0].split('"')[1] if new_entries else ""
           if first_date and first_date in content:
             print(f"Tirage du {first_date} déjà présent, rien à faire")
