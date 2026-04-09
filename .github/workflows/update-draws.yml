@@ -2,8 +2,6 @@ name: Mise à jour des tirages EuroMillions
 
 on:
   schedule:
-    # Balayage toutes les 30min entre 21h00 et 01h00 heure française
-    # GitHub Actions utilise UTC — France = UTC+2 en été, UTC+1 en hiver
     - cron: '00 19 * * 2,5'   # 21h00 heure française (UTC+2 été)
     - cron: '30 19 * * 2,5'   # 21h30
     - cron: '00 20 * * 2,5'   # 22h00
@@ -13,7 +11,7 @@ on:
     - cron: '00 22 * * 2,5'   # 00h00
     - cron: '30 22 * * 2,5'   # 00h30
     - cron: '00 23 * * 3,6'   # 01h00 (mercredi/samedi)
-  workflow_dispatch:            # Lancement manuel possible aussi
+  workflow_dispatch:
 
 jobs:
   update:
@@ -33,7 +31,8 @@ jobs:
           from datetime import datetime
 
           try:
-            url = "https://euromillions.api.pedromealha.dev/v1/draws?limit=10"
+            # On récupère les 5 derniers tirages triés du plus récent au plus ancien
+            url = "https://euromillions.api.pedromealha.dev/v1/draws?limit=5&order=desc"
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
             with urllib.request.urlopen(req, timeout=10) as r:
               data = json.loads(r.read())
@@ -46,16 +45,27 @@ jobs:
             print("Aucun tirage reçu")
             exit(0)
 
+          # Trie par date décroissante au cas où l'API ne le fait pas
+          def parse_date(d):
+            try:
+              return datetime.strptime(d.get("date","1900-01-01"), "%Y-%m-%d")
+            except:
+              return datetime.min
+
+          draws = sorted(draws, key=parse_date, reverse=True)
+
           new_entries = []
-          for d in draws[:5]:
+          for d in draws[:3]:
             try:
               date_str = datetime.strptime(d["date"], "%Y-%m-%d").strftime("%d/%m/%Y")
-              nums = d.get("numbers", [])
-              stars = d.get("stars", d.get("luckyStars", []))
+              # Force les numéros en entiers
+              nums = [int(n) for n in d.get("numbers", [])]
+              stars = [int(s) for s in d.get("stars", d.get("luckyStars", []))]
               if len(nums) == 5 and len(stars) == 2:
                 entry = f'  {{ date: "{date_str}", numbers: {nums}, stars: {stars} }}'
                 new_entries.append(entry)
-            except:
+            except Exception as e:
+              print(f"Erreur entrée: {e}")
               continue
 
           if not new_entries:
@@ -65,7 +75,7 @@ jobs:
           with open("data.js", "r", encoding="utf-8") as f:
             content = f.read()
 
-          # Anti-doublon
+          # Anti-doublon : si la date la plus récente est déjà là on arrête
           first_date = new_entries[0].split('"')[1] if new_entries else ""
           if first_date and first_date in content:
             print(f"Tirage du {first_date} déjà présent, rien à faire")
