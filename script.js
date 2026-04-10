@@ -692,15 +692,6 @@ async function initPerformancePanel() {
   }
 }
 
-// ── Override showPanel pour init performance ──────────────────
-const _origShowPanel = showPanel;
-function showPanel(id, tabEl) {
-  _origShowPanel(id, tabEl);
-  if (id === 'performance') {
-    initPerformancePanel();
-  }
-}
-
 // ── Override generateGrids pour sauvegarder dans Firebase ─────
 const _origGenerateGrids = generateGrids;
 async function generateGrids() {
