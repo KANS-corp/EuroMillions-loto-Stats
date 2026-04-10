@@ -498,3 +498,230 @@ function delayBadge(d) {
   if (d <= 15) return `<span class="delay-badge delay-warm">Normal (${d})</span>`;
   return `<span class="delay-badge delay-cold">En retard (${d})</span>`;
 }
+
+// ============================================================
+// PERFORMANCE IA — Fonctions Firebase
+// ============================================================
+
+// Import dynamique Firebase
+let fbModule = null;
+
+async function getFB() {
+  if (!fbModule) {
+    fbModule = await import('./firebase.js');
+  }
+  return fbModule;
+}
+
+// ── Entraînement sur tirages historiques ──────────────────────
+async function trainHistorical() {
+  const status = document.getElementById('training-status');
+  status.innerHTML = '⏳ Entraînement en cours sur les tirages réels...';
+  
+  try {
+    const fb = await getFB();
+    const draws = currentGame === 'euro' ? RECENT_DRAWS : LOTO_RECENT_DRAWS;
+    const results = await fb.trainOnHistoricalData(draws, currentGame);
+    
+    status.innerHTML = `✅ Entraînement terminé sur ${draws.length} tirages réels !`;
+    await loadPerformances();
+  } catch(e) {
+    status.innerHTML = `❌ Erreur : ${e.message}`;
+  }
+}
+
+// ── Entraînement sur tirages fictifs ──────────────────────────
+async function trainFictive(nb) {
+  const status = document.getElementById('training-status');
+  status.innerHTML = `⏳ Génération et entraînement sur ${nb.toLocaleString('fr')} tirages fictifs... (peut prendre quelques secondes)`;
+  
+  try {
+    const fb = await getFB();
+    const results = await fb.trainOnFictiveData(nb, currentGame);
+    
+    status.innerHTML = `✅ Entraînement terminé sur ${nb.toLocaleString('fr')} tirages fictifs !`;
+    await loadPerformances();
+  } catch(e) {
+    status.innerHTML = `❌ Erreur : ${e.message}`;
+  }
+}
+
+// ── Charger les performances ──────────────────────────────────
+async function loadPerformances() {
+  try {
+    const fb = await getFB();
+    const perfs = await fb.getAllPerformances(currentGame);
+    
+    if (!perfs.length) {
+      document.getElementById('perf-table').innerHTML = `
+        <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">
+          Aucune donnée — Lance d'abord un entraînement 👆
+        </td></tr>`;
+      return;
+    }
+
+    // Trie par moyenne de bons numéros
+    perfs.sort((a, b) => parseFloat(b.avgNums || 0) - parseFloat(a.avgNums || 0));
+
+    const medals = ['🥇', '🥈', '🥉'];
+    document.getElementById('perf-table').innerHTML = perfs.map((p, i) => {
+      const avgNums = parseFloat(p.avgNums || 0);
+      const avgExtra = parseFloat(p.avgExtra || 0);
+      const score = (avgNums * 10 + avgExtra * 5).toFixed(1);
+      const barWidth = (avgNums / 5 * 100).toFixed(1);
+      
+      return `<tr>
+        <td>${medals[i] || (i+1)}</td>
+        <td style="font-weight:600">${modeLabel(p.strategy)}</td>
+        <td style="color:var(--muted)">${(p.totalGrilles||0).toLocaleString('fr')}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="bar-wrap" style="width:80px">
+              <div class="bar-fill ${currentGame === 'euro' ? 'bar-euro' : 'bar-loto'}" 
+                   style="width:${barWidth}%"></div>
+            </div>
+            <span style="font-weight:600;color:${i===0?'var(--gold)':'var(--text)'}">${avgNums}</span>
+            <span style="font-size:11px;color:var(--muted)">/ 5</span>
+          </div>
+        </td>
+        <td style="color:var(--muted)">${avgExtra} / ${currentGame === 'euro' ? 2 : 1}</td>
+        <td>
+          <span style="padding:3px 10px;border-radius:6px;font-weight:700;font-size:13px;
+            background:${i===0?'rgba(245,200,66,.15)':'rgba(255,255,255,.05)'};
+            color:${i===0?'var(--gold)':'var(--muted)'}">
+            ${score} pts
+          </span>
+        </td>
+      </tr>`;
+    }).join('');
+
+  } catch(e) {
+    console.error('Erreur chargement performances:', e);
+  }
+}
+
+// ── Scorer les grilles en attente ─────────────────────────────
+async function scoreAllPending() {
+  const container = document.getElementById('pending-grilles');
+  container.innerHTML = '⏳ Scoring en cours...';
+
+  try {
+    const fb = await getFB();
+    const grilles = await fb.getUnscoredGrilles(currentGame);
+    
+    if (!grilles.length) {
+      container.innerHTML = 'Aucune grille en attente de score.';
+      return;
+    }
+
+    const draws = currentGame === 'euro' ? RECENT_DRAWS : LOTO_RECENT_DRAWS;
+    let scored = 0;
+
+    for (const grille of grilles) {
+      // Cherche le tirage correspondant à la date la plus proche après la grille
+      const grilleDate = new Date(grille.createdAt);
+      const matchingDraw = draws.find(d => {
+        const parts = d.date.split('/');
+        const drawDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+        return drawDate >= grilleDate;
+      });
+
+      if (matchingDraw) {
+        await fb.scoreGrille(grille.id, grille, matchingDraw);
+        scored++;
+      }
+    }
+
+    container.innerHTML = `✅ ${scored} grille(s) scorée(s) !`;
+    await loadScoredHistory();
+    await loadPerformances();
+
+  } catch(e) {
+    container.innerHTML = `❌ Erreur : ${e.message}`;
+  }
+}
+
+// ── Charger l'historique des scores ──────────────────────────
+async function loadScoredHistory() {
+  try {
+    const fb = await getFB();
+    const q_snap = await fb.getAllPerformances(currentGame); // reuse connection
+    
+    // Charge les grilles scorées directement
+    const { getFirestore, collection, query, where, orderBy, limit, getDocs } = 
+      await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+    
+    // Affiche un message d'attente
+    document.getElementById('scores-history').innerHTML = `
+      <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px">
+        Lance "Scorer toutes" pour voir l'historique
+      </td></tr>`;
+      
+  } catch(e) {
+    console.error('Erreur historique scores:', e);
+  }
+}
+
+// ── Init panel performance ────────────────────────────────────
+async function initPerformancePanel() {
+  await loadPerformances();
+  
+  const container = document.getElementById('pending-grilles');
+  try {
+    const fb = await getFB();
+    const grilles = await fb.getUnscoredGrilles(currentGame);
+    
+    if (!grilles.length) {
+      container.innerHTML = 'Aucune grille en attente — génère des grilles et joue-les !';
+      return;
+    }
+
+    container.innerHTML = grilles.map(g => `
+      <div class="gen-hist-item">
+        <span style="font-size:11px;color:var(--muted)">${new Date(g.createdAt).toLocaleDateString('fr-FR')}</span>
+        <span style="font-size:11px;padding:2px 8px;border-radius:4px;background:var(--surface2);color:var(--muted)">${modeLabel(g.strategy)}</span>
+        <div style="display:flex;gap:4px;margin-left:auto">
+          ${g.numbers.map(n => `<div class="small-ball ${g.game==='euro'?'ball-num':'ball-loto'}" style="width:28px;height:28px;font-size:12px">${n}</div>`).join('')}
+          <span style="color:var(--muted)">·</span>
+          ${(g.extra||[]).map(s => `<div class="small-ball ${g.game==='euro'?'ball-star':'ball-chance'}" style="width:28px;height:28px;font-size:12px">${s}</div>`).join('')}
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {
+    container.innerHTML = 'Génère des grilles pour commencer !';
+  }
+}
+
+// ── Override showPanel pour init performance ──────────────────
+const _origShowPanel = showPanel;
+function showPanel(id, tabEl) {
+  _origShowPanel(id, tabEl);
+  if (id === 'performance') {
+    initPerformancePanel();
+  }
+}
+
+// ── Override generateGrids pour sauvegarder dans Firebase ─────
+const _origGenerateGrids = generateGrids;
+async function generateGrids() {
+  _origGenerateGrids();
+  
+  // Sauvegarde les grilles dans Firebase en arrière-plan
+  try {
+    const fb = await getFB();
+    const count = parseInt(document.getElementById('grid-count').value);
+    // Les grilles viennent d'être générées, on récupère depuis genHistory
+    const recent = genHistory.slice(0, count);
+    for (const g of recent) {
+      await fb.saveGrille({
+        game: g.game,
+        numbers: g.numbers,
+        extra: g.extra || [],
+        strategy: currentMode
+      });
+    }
+  } catch(e) {
+    // Silencieux — Firebase optionnel
+    console.warn('Firebase save failed:', e);
+  }
+}
