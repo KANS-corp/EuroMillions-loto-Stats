@@ -199,6 +199,7 @@
   <button class="tab euro-tab" onclick="showPanel('generator', this)">Générateur</button>
   <button class="tab euro-tab" onclick="showPanel('history', this)">Derniers tirages</button>
   <button class="tab euro-tab" onclick="showPanel('strategies', this)">📖 Stratégies</button>
+  <button class="tab euro-tab" onclick="showPanel('performance', this)">🧠 Performance IA</button>
   <button class="tab euro-tab" onclick="showPanel('explainer', this)">🔢 Comprendre les stats</button>
 </div>
 
@@ -433,6 +434,80 @@
     </div>
   </div>
 
+  <!-- PERFORMANCE IA -->
+  <div id="panel-performance" class="panel">
+    <p class="section-title euro-accent">🧠 Performance & Apprentissage</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.7">
+      Le système analyse les stratégies sur les tirages historiques et s'affine au fil du temps.
+    </p>
+
+    <!-- ACTIONS ENTRAÎNEMENT -->
+    <div class="table-wrap" style="margin-bottom:20px">
+      <div class="table-header"><span class="table-title">🎓 Entraînement du système</span></div>
+      <div style="padding:20px;display:flex;gap:12px;flex-wrap:wrap">
+        <button onclick="trainHistorical()" class="gen-btn euro-btn" style="font-size:14px;padding:10px 20px;margin:0">
+          📊 Entraîner sur tirages réels
+        </button>
+        <button onclick="trainFictive(1000)" class="gen-btn euro-btn" style="font-size:14px;padding:10px 20px;margin:0;background:linear-gradient(135deg,#3a6bff,#1a3a99);color:#fff">
+          🎲 Entraîner sur 1 000 tirages fictifs
+        </button>
+        <button onclick="trainFictive(10000)" class="gen-btn euro-btn" style="font-size:14px;padding:10px 20px;margin:0;background:linear-gradient(135deg,#2ecc71,#1a8a4a);color:#fff">
+          🚀 Entraîner sur 10 000 tirages fictifs
+        </button>
+      </div>
+      <div id="training-status" style="padding:0 20px 16px;font-size:13px;color:var(--muted)"></div>
+    </div>
+
+    <!-- CLASSEMENT STRATÉGIES -->
+    <p class="section-title euro-accent">🏆 Classement des stratégies</p>
+    <div class="table-wrap" style="margin-bottom:20px">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Stratégie</th>
+            <th>Grilles testées</th>
+            <th>Moy. bons numéros</th>
+            <th>Moy. bonnes étoiles</th>
+            <th>Score global</th>
+          </tr>
+        </thead>
+        <tbody id="perf-table"></tbody>
+      </table>
+    </div>
+
+    <!-- SCORER MES GRILLES -->
+    <p class="section-title euro-accent">🎯 Scorer mes grilles contre les vrais tirages</p>
+    <div class="table-wrap" style="margin-bottom:20px">
+      <div class="table-header">
+        <span class="table-title">Grilles en attente de score</span>
+        <button onclick="scoreAllPending()" style="font-size:12px;background:var(--gold);color:#000;border:none;padding:4px 12px;border-radius:6px;cursor:pointer;font-weight:600">
+          Scorer toutes
+        </button>
+      </div>
+      <div id="pending-grilles" style="padding:16px;font-size:13px;color:var(--muted)">
+        Chargement...
+      </div>
+    </div>
+
+    <!-- HISTORIQUE SCORES -->
+    <p class="section-title euro-accent">📈 Historique de mes scores</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Stratégie</th>
+            <th>Ma grille</th>
+            <th>Tirage réel</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody id="scores-history"></tbody>
+      </table>
+    </div>
+  </div>
+
 </main>
 
 <!-- FOOTER COMPLET -->
@@ -480,6 +555,7 @@
   </div>
 </footer>
 
+<script type="module" src="firebase.js"></script>
 <script src="data.js"></script>
 <script src="script.js"></script>
 </body>
