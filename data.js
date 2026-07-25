@@ -34,6 +34,9 @@ const TOTAL_DRAWS = 1547;
 // Derniers tirages réels (les plus récents en premier)
 // Format: { date, numbers: [5 nums], stars: [2 étoiles] }
 const RECENT_DRAWS = [
+  { date: "24/07/2026", numbers: [8, 10, 30, 36, 47], stars: [1, 4] },
+  { date: "21/07/2026", numbers: [2, 3, 8, 28, 39], stars: [2, 11] },
+  { date: "17/07/2026", numbers: [12, 21, 23, 34, 40], stars: [9, 10] },,
   { date: "17/07/2026", numbers: [12, 21, 23, 34, 40], stars: [9, 10] },
   { date: "14/07/2026", numbers: [10, 19, 37, 42, 47], stars: [9, 12] },
   { date: "10/07/2026", numbers: [2, 14, 28, 33, 48], stars: [8, 10] },,
